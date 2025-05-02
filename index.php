@@ -1,126 +1,145 @@
-<?php
-session_start();
-require_once "database.php";  // Ensure this file correctly connects to your database
-
-// Initialize variables for success message and errors
-$successMessage = "";
-$errors = [];
-
-if (isset($_POST["submit"])) {
-    // Get form input values
-    $username = $_POST["username"];
-    $email = $_POST["email"];
-    $password = $_POST["password"];
-    $passwordRepeat = $_POST["confirm_password"];
-    $passwordHash = password_hash($password, PASSWORD_DEFAULT);  // Hash the password
-
-    // Validate fields
-    if (empty($username) || empty($email) || empty($password) || empty($passwordRepeat)) {
-        $errors[] = "All fields are required";
-    }
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = "Email is not valid";
-    }
-    if ($password !== $passwordRepeat) {
-        $errors[] = "Passwords do not match";
-    }
-
-    // If there are no validation errors, insert into the database
-    if (empty($errors)) {
-        $sql = "INSERT INTO viewers (username, email, password) VALUES (?, ?, ?)";
-        $stmt = mysqli_stmt_init($conn);
-        
-        if (mysqli_stmt_prepare($stmt, $sql)) {
-            mysqli_stmt_bind_param($stmt, "sss", $username, $email, $passwordHash);
-            if (mysqli_stmt_execute($stmt)) {
-                // Success: Store success message in session, then redirect
-                $_SESSION["success"] = "Registration successful!";
-                header("Location: reg.php");  // Redirect to the same page
-                exit();
-            } else {
-                $errors[] = "Error during registration. Please try again.";
-            }
-        } else {
-            $errors[] = "Database error: Could not prepare statement.";
-        }
-    }
-
-    // Store errors in session and redirect
-    if (!empty($errors)) {
-        $_SESSION["errors"] = $errors;
-        header("Location: reg.php");  // Redirect to refresh the page
-        exit();
-    }
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration Form</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Login Form</title>
     <style>
-        /* Style for the login button inside the form */
-        .login-btn {
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #form {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+
+        #form h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        label {
+            float: left;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        #login {
+            width: 100%;
             color: white;
             background-color: blueviolet;
             padding: 10px;
             font-size: large;
             border-radius: 10px;
-            width: 100%; /* Make the button take full width inside the form */
-            margin-top: 10px; /* Adds space above the button */
+            border: none;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
-        .login-btn:hover {
-            background-color: darkviolet; /* Change color when hovered */
+        #login:hover {
+            background-color: indigo;
+        }
+
+        p {
+            margin-top: 15px;
+            color: #666;
+        }
+
+        a {
+            color: blueviolet;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div id="form">
-        <!-- Display success message if set -->
+        <h1>Login Form</h1>
         <?php
-        if (!empty($_SESSION["success"])) {
-            echo "<p style='color:green;'>" . $_SESSION["success"] . "</p>";
-            unset($_SESSION["success"]);  // Clear success message after displaying
+    session_start();
+    require_once "database.php";
+
+    if (isset($_POST["submit"])) {
+        $username = $_POST["username"];
+        $password = $_POST["password"];
+        $errors = array();
+
+        if (empty($username) || empty($password)) {
+            array_push($errors, "Both fields are required");
         }
 
-        // Display validation errors if any
-        if (!empty($_SESSION["errors"])) {
-            foreach ($_SESSION["errors"] as $error) {
+        if (empty($errors)) {
+            $sql = "SELECT * FROM viewers WHERE username = ?";
+            $stmt = mysqli_stmt_init($conn);
+
+            if (mysqli_stmt_prepare($stmt, $sql)) {
+                mysqli_stmt_bind_param($stmt, "s", $username);
+                mysqli_stmt_execute($stmt);
+                $result = mysqli_stmt_get_result($stmt);
+
+                if (mysqli_num_rows($result) > 0) {
+                    $user = mysqli_fetch_assoc($result);
+
+                    if (password_verify($password, $user['password'])) {
+                        echo "<p style='color:green;'>Login successful!</p>";
+                        $_SESSION['username'] = $user['username'];
+                        $_SESSION['id'] = $user['id'];
+                        // header("Location: dashboard.php"); // Optional
+                        // exit();
+                    } else {
+                        echo "<p style='color:red;'>Incorrect password!</p>";
+                    }
+                } else {
+                    echo "<p style='color:red;'>No user found with that username.</p>";
+                }
+            } else {
+                echo "<p style='color:red;'>Database error: could not prepare statement.</p>";
+            }
+        } else {
+            foreach ($errors as $error) {
                 echo "<p style='color:red;'>$error</p>";
             }
-            unset($_SESSION["errors"]);  // Clear errors after displaying
         }
-        ?>
-
-        <h1>Registration Form</h1>
-        <form action="reg.php" method="post">
+    }
+    ?>
+        <form action="login.php" method="post">
 
             <label for="username">Username:</label><br>
-            <input type="text" id="username" name="username" required><br><br>
-
-            <label for="email">Email:</label><br>
-            <input type="email" id="email" name="email" required><br><br>
+            <input type="text" id="username" name="username" required><br>
 
             <label for="password">Password:</label><br>
-            <input type="password" id="password" name="password" required><br><br>
+            <input type="password" id="password" name="password" required><br>
 
-            <label for="confirm_password">Re-enter Password:</label><br>
-            <input type="password" id="confirm_password" name="confirm_password" required><br><br>
-
-            <input type="submit" id="btn" name="submit" value="Register">
-
-            <!-- Login Button inside the form -->
-            <a href="index.php">
-                <button type="button" class="login-btn">Login</button>
-            </a>
-
+            <input type="submit" id="login" name="submit" value="Login">
         </form>
+
+        <p>Don't have an account? <a href="reg.php">Register</a></p>
     </div>
+
+    
 </body>
 </html>
-
