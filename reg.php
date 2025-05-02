@@ -77,6 +77,76 @@ if (isset($_POST["submit"])) {
         .login-btn:hover {
             background-color: darkviolet; /* Change color when hovered */
         }
+         body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #form {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+
+        #form h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        label {
+            float: left;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        #login {
+            width: 100%;
+            color: white;
+            background-color: blueviolet;
+            padding: 10px;
+            font-size: large;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #login:hover {
+            background-color: indigo;
+        }
+
+        p {
+            margin-top: 15px;
+            color: #666;
+        }
+
+        a {
+            color: blueviolet;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
