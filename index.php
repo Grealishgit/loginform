@@ -1,3 +1,10 @@
+<?php
+session_start();
+    require_once "database.php";
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -80,9 +87,6 @@
     <div id="form">
         <h1>Login Form</h1>
         <?php
-    session_start();
-    require_once "database.php";
-
     if (isset($_POST["submit"])) {
         $username = $_POST["username"];
         $password = $_POST["password"];
@@ -126,7 +130,7 @@
         }
     }
     ?>
-        <form action="login.php" method="post">
+        <form action="index.php" method="post">
 
             <label for="username">Username:</label><br>
             <input type="text" id="username" name="username" required><br>
