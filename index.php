@@ -115,7 +115,7 @@ if (isset($_POST["submit"])) {
             <input type="submit" id="btn" name="submit" value="Register">
 
             <!-- Login Button inside the form -->
-            <a href="login.php">
+            <a href="index.php">
                 <button type="button" class="login-btn">Login</button>
             </a>
 
