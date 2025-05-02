@@ -7,6 +7,7 @@ $password = "0qDshkQ1T04MJIAhytEeAI5lK7ogEC9r";
 
 $conn_string = "host=$host port=$port dbname=$dbname user=$user password=$password";
 
+
 $conn = pg_connect($conn_string);
 
 if (!$conn) {
