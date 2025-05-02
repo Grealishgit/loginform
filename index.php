@@ -13,7 +13,7 @@ require_once "database.php"; // Ensure this connects to your PostgreSQL DB
      <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            background-color: darkviolet;
             display: flex;
             justify-content: center;
             align-items: center;

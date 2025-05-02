@@ -75,7 +75,7 @@ if (isset($_POST["submit"])) {
 
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            background-color: darkviolet;
             display: flex;
             justify-content: center;
             align-items: center;
