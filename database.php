@@ -24,11 +24,11 @@ $sql = "CREATE TABLE IF NOT EXISTS viewers (
 // Execute the SQL query to create the table (if not already created)
 $result = pg_query($conn, $sql);
 
-if ($result) {
+/* if ($result) {
     echo "Table 'viewers' created successfully!";
 } else {
     echo "Error creating table: " . pg_last_error($conn);
-}
+} */
 
 // Do not close the connection here. Let reg.php handle it.
 ?>
