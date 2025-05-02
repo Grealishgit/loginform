@@ -1,9 +1,8 @@
 <?php
 session_start();
-    require_once "database.php";
+require_once "database.php"; // Ensure this connects to your PostgreSQL DB
+
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,7 +10,7 @@ session_start();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Form</title>
-    <style>
+     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
@@ -87,51 +86,43 @@ session_start();
     <div id="form">
         <h1>Login Form</h1>
         <?php
-    if (isset($_POST["submit"])) {
-        $username = $_POST["username"];
-        $password = $_POST["password"];
-        $errors = array();
+        if (isset($_POST["submit"])) {
+            $username = $_POST["username"];
+            $password = $_POST["password"];
+            $errors = array();
 
-        if (empty($username) || empty($password)) {
-            array_push($errors, "Both fields are required");
-        }
+            if (empty($username) || empty($password)) {
+                array_push($errors, "Both fields are required");
+            }
 
-        if (empty($errors)) {
-            $sql = "SELECT * FROM viewers WHERE username = ?";
-            $stmt = mysqli_stmt_init($conn);
+            if (empty($errors)) {
+                // PostgreSQL query to fetch user data
+                $sql = "SELECT * FROM viewers WHERE username = $1";
+                $result = pg_query_params($conn, $sql, array($username));
 
-            if (mysqli_stmt_prepare($stmt, $sql)) {
-                mysqli_stmt_bind_param($stmt, "s", $username);
-                mysqli_stmt_execute($stmt);
-                $result = mysqli_stmt_get_result($stmt);
+                if ($result) {
+                    $user = pg_fetch_assoc($result);
 
-                if (mysqli_num_rows($result) > 0) {
-                    $user = mysqli_fetch_assoc($result);
-
-                    if (password_verify($password, $user['password'])) {
+                    if ($user && password_verify($password, $user['password'])) {
                         echo "<p style='color:green;'>Login successful!</p>";
                         $_SESSION['username'] = $user['username'];
                         $_SESSION['id'] = $user['id'];
                         // header("Location: dashboard.php"); // Optional
                         // exit();
                     } else {
-                        echo "<p style='color:red;'>Incorrect password!</p>";
+                        echo "<p style='color:red;'>Incorrect password or user not found!</p>";
                     }
                 } else {
-                    echo "<p style='color:red;'>No user found with that username.</p>";
+                    echo "<p style='color:red;'>Database error: could not prepare statement.</p>";
                 }
             } else {
-                echo "<p style='color:red;'>Database error: could not prepare statement.</p>";
-            }
-        } else {
-            foreach ($errors as $error) {
-                echo "<p style='color:red;'>$error</p>";
+                foreach ($errors as $error) {
+                    echo "<p style='color:red;'>$error</p>";
+                }
             }
         }
-    }
-    ?>
+        ?>
         <form action="index.php" method="post">
-
             <label for="username">Username:</label><br>
             <input type="text" id="username" name="username" required><br>
 
@@ -143,7 +134,5 @@ session_start();
 
         <p>Don't have an account? <a href="reg.php">Register</a></p>
     </div>
-
-    
 </body>
 </html>

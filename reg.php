@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once "database.php";  // Ensure this file correctly connects to your database
+require_once "database.php";  // Ensure this file correctly connects to your PostgreSQL database
 
 // Initialize variables for success message and errors
 $successMessage = "";
@@ -27,21 +27,16 @@ if (isset($_POST["submit"])) {
 
     // If there are no validation errors, insert into the database
     if (empty($errors)) {
-        $sql = "INSERT INTO viewers (username, email, password) VALUES (?, ?, ?)";
-        $stmt = mysqli_stmt_init($conn);
-        
-        if (mysqli_stmt_prepare($stmt, $sql)) {
-            mysqli_stmt_bind_param($stmt, "sss", $username, $email, $passwordHash);
-            if (mysqli_stmt_execute($stmt)) {
-                // Success: Store success message in session, then redirect
-                $_SESSION["success"] = "Registration successful!";
-                header("Location: reg.php");  // Redirect to the same page
-                exit();
-            } else {
-                $errors[] = "Error during registration. Please try again.";
-            }
+        $sql = "INSERT INTO viewers (username, email, password) VALUES ($1, $2, $3)";
+        $result = pg_query_params($conn, $sql, array($username, $email, $passwordHash));
+
+        if ($result) {
+            // Success: Store success message in session, then redirect
+            $_SESSION["success"] = "Registration successful!";
+            header("Location: reg.php");  // Redirect to the same page
+            exit();
         } else {
-            $errors[] = "Database error: Could not prepare statement.";
+            $errors[] = "Error during registration. Please try again.";
         }
     }
 
@@ -77,7 +72,8 @@ if (isset($_POST["submit"])) {
         .login-btn:hover {
             background-color: darkviolet; /* Change color when hovered */
         }
-         body {
+
+        body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
             display: flex;
@@ -185,7 +181,7 @@ if (isset($_POST["submit"])) {
             <input type="submit" id="btn" name="submit" value="Register">
 
             <!-- Login Button inside the form -->
-            <a href="login.php">
+            <a href="index.php">
                 <button type="button" class="login-btn">Login</button>
             </a>
 
@@ -193,4 +189,3 @@ if (isset($_POST["submit"])) {
     </div>
 </body>
 </html>
-
